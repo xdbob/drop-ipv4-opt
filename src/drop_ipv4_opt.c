@@ -5,6 +5,7 @@
 
 #include <linux/bpf.h>
 #include <linux/if_ether.h>
+#include <linux/in.h>
 #include <linux/ip.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_endian.h>
@@ -51,6 +52,9 @@ int drop_ipv4_opt(struct xdp_md *ctx)
 
 	struct iphdr *iph = cur;
 	if ((void *)(iph + 1) > data_end)
+		return XDP_PASS;
+
+	if (iph->protocol != IPPROTO_TCP)
 		return XDP_PASS;
 
 	// IHL is the header length in 32-bit words. 5 words (20 bytes) means
